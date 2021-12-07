@@ -1,11 +1,15 @@
 #include <stdio.h>
 #include <malloc.h>
+#include <string.h>
+#define TAM_MAXIMO 100
+
 
 /*
  * ALMACENAMIENTO DE TODAS LAS TAREAS PENDIENTES (LISTA)
  */
 typedef struct nodo {
     int dato;
+    char descripcionTarea[TAM_MAXIMO];
     struct nodo *nodoSiguiente;
 } nodo;
 
@@ -22,8 +26,10 @@ lista *crearLista() {
     return nuevaLista;
 };
 
-nodo *crearNodo(int dato) {
+nodo *crearNodo(int dato, char *descripcionTarea[TAM_MAXIMO]) {
+
     struct nodo *nuevoNodo = malloc(sizeof(nodo));
+    strcpy(nuevoNodo->descripcionTarea, (const char *) descripcionTarea);
     nuevoNodo->dato = dato;
     nuevoNodo->nodoSiguiente = NULL;
     return nuevoNodo;
@@ -92,122 +98,117 @@ void eliminarNodo(lista *lista, int datoEliminar) {
 /*
  * ALMACENAMIENTO DE TODAS LAS TAREAS REALIZADAS (PILA)
  */
-typedef struct nodoPila {
-    int datoPila;
-    struct nodoPila *nodoArribaPila;
-} nodoPila;
+typedef struct nodoCola {
+    int datoCola;
+    char descripcionTareaCola[TAM_MAXIMO];
+    struct nodoCola *siguienteNodoCola;
+} nodoCola;
 
-typedef struct pila {
-    struct nodoPila *base;
-    struct nodoPila *cima;
-} pila;
+typedef struct cola {
+    struct nodoCola *inicioCola;
+    struct nodoCola *finCola;
+} cola;
 
-pila *crarPila() {
-    struct pila *nuevaPila = malloc(sizeof(nodo));
-    nuevaPila->base = NULL;
-    nuevaPila->cima = NULL;
-    return nuevaPila;
+nodoCola *crearNodoCola(int numeroCola,char *descripcionTarea[TAM_MAXIMO]) {
+    struct nodoCola *nuevoNodoCola = malloc(sizeof(nodo));
+    strcpy(nuevoNodoCola->descripcionTareaCola, (const char *) descripcionTarea);
+    nuevoNodoCola->datoCola = numeroCola;
+    nuevoNodoCola->siguienteNodoCola = NULL;
+    return nuevoNodoCola;
 }
 
-nodoPila *crearNodoPila(int datoPila) {
-    struct nodoPila *nuevoNodo = malloc(sizeof(nodo));
-    nuevoNodo->datoPila = datoPila;
-    nuevoNodo->nodoArribaPila = NULL;
-    return nuevoNodo;
+cola *crearCola() {
+    struct cola *nuevaCola = malloc(sizeof(nodo));
+    nuevaCola->inicioCola = NULL;
+    nuevaCola->finCola = NULL;
+    return nuevaCola;
 }
 
-void elmiminarNodoMemoria(nodoPila *nodo) {
-    nodo->nodoArribaPila = NULL;
-    free(nodo);
-}
-
-void apilar(pila *pila, struct nodoPila *nuevoNodo) {
-    if (pila->base == NULL) {
-        pila->base = nuevoNodo;
-        pila->cima = nuevoNodo;
+void encolar(cola *cola, struct nodoCola* nuevoNodoCola) {
+    if (cola->inicioCola == NULL) {
+        cola->inicioCola = nuevoNodoCola;
+        cola->finCola = nuevoNodoCola;
     } else {
-        pila->cima->nodoArribaPila = nuevoNodo;
-        pila->cima = nuevoNodo;
+        cola->finCola->siguienteNodoCola = nuevoNodoCola;
+        cola->finCola = nuevoNodoCola;
     }
 }
 
-nodo *encontrarCima(pila *pila, struct nodoPila *nodoEliminar) {
-    nodoPila *nodoTemporal = pila->base;
-    while (nodoTemporal != NULL) {
-        if (nodoTemporal->nodoArribaPila == nodoEliminar) {
-            return nodoTemporal;
-        }
-    }
-
+void eliminarNodoMemoriaCola(nodoCola *nodoCola) {
+    nodoCola->siguienteNodoCola = NULL;
+    free(nodoCola);
 }
 
-void desapilar(pila *pila) {
-    if (pila->cima != NULL) {
-        nodoPila *nodoELiminar = pila->cima;
-        nodoPila *nodoCima = encontrarCima(pila, nodoELiminar);
-        nodoCima->nodoArribaPila;
-        pila->cima = nodoCima;
-    }
-}
+void descolar(cola *cola) {
+    if (cola->inicioCola != NULL) {
+        nodoCola *nodoEliminarCola = cola->inicioCola;
+        cola->inicioCola = cola->inicioCola->siguienteNodoCola;
+        eliminarNodoMemoriaCola(nodoEliminarCola);
 
-int cimaPila(pila *pila) {
-    int cima = 0;
-    if (pila->cima == 0) {
-        return 0;
     } else {
-        cima = (int) pila->cima;
-        printf("%i", cima);
+        printf("LA COLA ESTA VACIA");
     }
-    return cima;
 }
+
 
 int main() {
     int dato;
     int opcion = 0;
     struct lista *lista = crearLista();
-    struct pila *pila = crarPila();
+    struct cola *cola = crearCola();
 
     do {
         printf("Selccione: \n 1. Agregar tarea pendiente \n 2. Realizar tarea \n 3. Ver tareas pendientes \n 4. Ver treas realizadas \n 5. Restaurar tareas \n 6. Salir \n");
         scanf("%i", &opcion);
 
         if (opcion == 1) {
-        dato =0;
-
+        dato =1;
+        char descripcionTarea[TAM_MAXIMO];
 
             printf("Ingrese la prioridad de la tarea a crear: \n 1-Urgente \n 2-Mesurado \n 3-Ordinario \n");
             scanf("%i", &dato);
+            printf("Asigne un nommbre a la tarea: \n");
+            scanf("%s",&descripcionTarea);
 
             if (dato <= 3 && dato > 0) {
-                nodo *nuevoNodo = crearNodo(dato);
+               struct nodo *nuevoNodo = crearNodo(dato,descripcionTarea);
                 agregarOrdenado(lista, nuevoNodo);
             } else {
                 printf("DIGITE UN VALOR CORRECT0\n");
             }
 
         } else if (opcion == 2) {
-            dato=1;
+            dato=0;
+            char descripcionTarea[TAM_MAXIMO];
             printf("Ingrese el grado de prioridad de la tarea a realizar: \n");
             scanf("%i",&dato);
-            nodoPila* nuevoNodoPila = crearNodoPila(dato);
-            apilar(pila,nuevoNodoPila);
+            printf("Ingrese en nombre de la tarea a realizar: \n");
+            scanf("%s",descripcionTarea);
+            nodoCola* nuevoNodoCola = crearNodoCola(dato,descripcionTarea);
+            encolar(cola,nuevoNodoCola);
             eliminarNodo(lista,dato);
+
         }
         else if(opcion==3){
             nodo* nodoTemporal = lista->inicio;
+            printf("Tareas pendientes: \n");
             while (nodoTemporal!= NULL){
-                printf("Tareas pendientes: %i \n",nodoTemporal->dato);
+                printf("%i | %s \n",nodoTemporal->dato,nodoTemporal->descripcionTarea);
                 nodoTemporal = nodoTemporal->nodoSiguiente;
             }
         } else if(opcion==4){
-            nodoPila* nodoTemporal = pila->base;
+            nodoCola * nodoTemporal = cola->inicioCola;
+            printf("Tareas realizadas: \n");
             while (nodoTemporal!=NULL){
-                printf("Tareas realizadas: %i \n",nodoTemporal->datoPila);
-                nodoTemporal = nodoTemporal->nodoArribaPila;
+                printf("%i | %s \n",nodoTemporal->datoCola,nodoTemporal->descripcionTareaCola);
+                nodoTemporal = nodoTemporal->siguienteNodoCola;
             }
+
         } else if(opcion==5){
-            nodoPila* nodoTemporal = pila->cima;
-            nodo* nuevoNodo = crearNodo((int) nodoTemporal);
+            nodoCola* nodoTemporalCola = cola->inicioCola;
+            nodo* nuevoNodo = crearNodo(nodoTemporalCola->datoCola,nodoTemporalCola->descripcionTareaCola);
+            cola->inicioCola=cola->inicioCola->siguienteNodoCola;
+            eliminarNodoMemoriaCola(nodoTemporalCola);
             agregarOrdenado(lista,nuevoNodo);
         }
 
